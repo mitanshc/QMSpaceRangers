@@ -4,6 +4,7 @@ from std_msgs.msg import String
 import asyncio
 import websockets
 import json
+import threading
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 class RoverControlNode(Node):
@@ -11,10 +12,15 @@ class RoverControlNode(Node):
         super().__init__('rover_control_node')
         self.control_publisher = self.create_publisher(String, 'rover_control', 10)
         self.connected_clients = set()
-        self.start_websocket_server()
+
+        self.ws_thread = threading.Thread(target=self.start_websocket_server)
+        self.ws_thread.daemon = True
+        self.ws_thread.start()
 
     def start_websocket_server(self):
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
         loop.run_until_complete(self.websocket_server())
 
     async def websocket_server(self):
@@ -36,20 +42,51 @@ class RoverControlNode(Node):
             async for message in websocket:
                 try:
                     data = json.loads(message)
-                    self.get_logger().info(f"Raw JSON data:\n{json.dumps(data, indent=2)}")                    
+                    # self.get_logger().info(f"Raw JSON data:\n{json.dumps(data, indent=2)}")                    
 
                     msg = String()
-                    msg.data = json.dumps(data)
+                    msg.data = message
                     
                     if data['input_type'] == 'keyboard':
-                        if data['data'].get('key_w'):
-                            # self.get_logger().info("Moving forward")
-                            pass
+                        keyboard_data = data['data']
+
+                        angle = keyboard_data.get('angle', 0)
+                        speed = keyboard_data.get('speed', 0)
+                        # key_w = keyboard_data.get('key_w', False)
+                        # key_a = keyboard_data.get('key_a', False)
+                        # key_s = keyboard_data.get('key_s', False)
+                        # key_d = keyboard_data.get('key_d', False)
+
+                        if speed > 0:
+                            self.get_logger().info(f"Movement: angle: {angle}, speed: {speed}")
+
+                            if angle == 0:
+                                self.get_logger().info("Direction: Forward")
+                            elif angle == 45:
+                                self.get_logger().info("Direction: Forward-Right")
+                            elif angle == 90:
+                                self.get_logger().info("Direction: Right")
+                            elif angle == 135:
+                                self.get_logger().info("Direction: Back-Right")
+                            elif angle == 180:
+                                self.get_logger().info("Direction: Back")
+                            elif angle == 225:
+                                self.get_logger().info("Direction: Back-Left")
+                            elif angle == 270:
+                                self.get_logger().info("Direction: Left")
+                            elif angle == 315:
+                                self.get_logger().info("Direction: Forward-Left")
                     elif data['input_type'] == 'controller':
                         left_y = data['data'].get('left_stick_y', 0)
                         if abs(left_y) > 0.1:
                             self.get_logger().info(f"Moving at speed: {left_y}")
                     
+                    simplified_data = {
+                        "angle": angle,
+                        "speed": speed
+                    }
+                    msg = String()
+                    msg.data = json.dumps(simplified_data)
                     self.control_publisher.publish(msg)
                     
                 except json.JSONDecodeError:
