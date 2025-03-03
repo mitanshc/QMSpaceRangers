@@ -16,7 +16,9 @@ setup(
     license='Apache 2.0',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [],
+        'console_scripts': [
+        'qr_listener = rover_bringup.qr_listener:main',
+        ],
     },
     data_files=[
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
