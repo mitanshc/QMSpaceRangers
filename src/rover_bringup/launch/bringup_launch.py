@@ -7,4 +7,5 @@ def generate_launch_description():
         Node(package='rover_control', executable='control_node', output='screen'),
         Node(package='rover_sensors', executable='imu_node', output='screen'),
         Node(package='rover_teleop', executable='rover_teleop', output='screen'),
+        Node(package='rover_sensors', executable='rover_camera', output='screen'),
     ])

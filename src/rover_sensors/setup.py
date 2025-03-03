@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'imu_node = rover_sensors.imu_node:main',  #Entry point for imu_node node, if you delete this the code will show up "not executable"
+            'rover_camera = rover_sensors.rover_camera:main',  #Entry point for imu_node node, if you delete this the code will show up "not executable"
         ],
     },
 )
