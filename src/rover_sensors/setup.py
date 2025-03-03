@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'imu_node = rover_sensors.imu_node:main',  #Entry point for imu_node node, if you delete this the code will show up "not executable"
         ],
     },
 )
