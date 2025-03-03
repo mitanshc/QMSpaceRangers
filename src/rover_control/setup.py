@@ -20,6 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'control_node = rover_control.control_node:main',  #Entry point for rover_control node, if you delete this the code will show up "not executable"
+            'sensor_dummy = rover_control.sensor_dummy:main', #Entry point for rover_control node
         ],
     },
 )
