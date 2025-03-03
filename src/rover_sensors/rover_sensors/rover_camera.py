@@ -13,7 +13,7 @@ class LiveFeedPublisher(Node):
         self.publisher = self.create_publisher(Image, 'live_feed',10)
         self.bridge = CvBridge() 
 
-        self.cap =cv2.VideoCapture("/dev/video0") #to be changed for raspeberry pi
+        self.cap =cv2.VideoCapture("libcamerassrc ! video/x-raw,width=320,height=240,framerates=5/1 ! videoconvert ! appsink", cv2.CAP_GSTREAMER) ) #to be changed for raspberry pi
         if not self.cap.isOpened():
             self.get_logger().error("Unable to open camera") 
         else:
